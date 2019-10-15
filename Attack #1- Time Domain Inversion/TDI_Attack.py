@@ -36,7 +36,7 @@ import sys
 
 # In[2]:
 
-
+#This function transcribes the wav file based off the specific 'model' transcription 
 def transcribe(my_path,model):
     wit_key = ''
 
@@ -61,12 +61,14 @@ def transcribe(my_path,model):
 
 # In[6]:
 
-
+#Path of the wav file to modify 
 fs, data = scipy.io.wavfile.read(r"C:\Users\hamza\OneDrive\Desktop\ResearchML\venmo.wav")
+
+#Determines the size of the window to invert 
 elementsInBucket = 25
 n = int(len(data)/elementsInBucket)
 
-#Breaks array into buckets of elements
+#Breaks array into n buckets of elements
 def createBuckets(arr, n):
     length = len(arr)
     return [ arr[i*length // n: (i+1)*length // n] 
@@ -85,6 +87,7 @@ for x in splitArray[:n]:
 
 data2 = np.asanyarray(l)
 
+#Write back the file in proper form
 scipy.io.wavfile.write(r"C:\Users\hamza\OneDrive\Desktop\ResearchML\venmo_temp.wav", fs, data2)
 transcribe(r"C:\Users\hamza\OneDrive\Desktop\ResearchML\venmo_temp.wav", "google")
 
