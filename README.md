@@ -19,9 +19,9 @@ The direct path to the location of the .wav file to be pertubated in the attack 
 2. Window Size
 The window size determines the length of the window to be inverted throughout the array representation of the .wav file
 
-    -ex: window size of 5 will have this effect on an array from 1-10
-    -original: [1 2 3 4 5 6 7 8 9 10]
-    -window size of 5 inversion: [5 4 3 2 1 10 9 8 7 6]
+    -ex: window size of 5 will have this effect on an array from 1-10                     
+    -original: [1 2 3 4 5 6 7 8 9 10]                          
+    -window size of 5 inversion: [5 4 3 2 1 10 9 8 7 6]                      
 
 
 # 2. Random Phase Generation (RPG)
