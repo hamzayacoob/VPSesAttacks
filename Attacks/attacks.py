@@ -36,10 +36,6 @@ import contextlib
 import argparse
 
 
-
-# In[ ]:
-
-
 parser = argparse.ArgumentParser()
 
 #pathF = argv[1]
@@ -48,11 +44,15 @@ parser = argparse.ArgumentParser()
 #validationPercentF = argv[4]
 #testPercentF = argv[5]
 
-parser.add_argument("-p", "--path",dest ="pathF", help="This is the path to the audio wav file")
-parser.add_argument("-f", "--frequency",dest = "frequencyF", help="This is the frequency of the sine wave generated", type=int)
-parser.add_argument("-i", "--intensity",dest ="intensityF", help="This is the intensity of the sine wave generated", type=int)
-parser.add_argument("-window", "--windowSize",dest ="windowSize", help="This is the size of the window inverted in the TDI Attack", type=int)
-parser.add_argument("-type", "--typeOfAttack",dest ="type", help="Allows user to select which type of command to use", type=int) #add required=True at the end
+parser.add_argument("-p", "--path", dest ="pathF", help="Path to read in the input audio wav file")
+parser.add_argument("-output", "--outputPath", dest ="outputPath", help="Path for where to write the new audio wav file")
+parser.add_argument("-f", "--frequency", dest = "frequencyF", help="This is the frequency of the sine wave generated", type=int)
+parser.add_argument("-i", "--intensity", dest ="intensityF", help="This is the intensity of the sine wave generated", type=int)
+parser.add_argument("-window", "--windowSize", dest ="windowSize", help="This is the size of the window inverted in the TDI Attack", type=int)
+parser.add_argument("-type", "--typeOfAttack", dest ="type", 
+help="Select which type of command to use: TDI, HFA, Time Scale") #add required=True at the end
+parser.add_argument("--tempo", dest ="tempo", help="Adjust the tempo of the audio sample for Time Scaling attack") #add required=True at the end
+
 
 
 
@@ -82,7 +82,7 @@ def transcribe(my_path,model):
         except sr.RequestError as e:
             print("Google error; {0}".format(e))
 
-def HFA(path, frequency, intensity):
+def HFA(type, path, frequency, intensity):
     fs, data = scipy.io.wavfile.read(path)
     length = len(data)
     
@@ -108,13 +108,16 @@ def HFA(path, frequency, intensity):
     #print(resultSound)
 
     #5. Writes the audio file and then transcribes it 
-    scipy.io.wavfile.write(path[0:-4]+''+'_OutputWav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav', sampleRate, resultSound)
-    transcribe(path[0:-4]+''+'_OutputWav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav', "google")
+    new_audio_path = scipy.io.wavfile.write(path[0:-4]+''+'_OutputWav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav', sampleRate, resultSound)
     
-#HFA(args.pathF, args.frequencyF, args.intensityF)
+    print("Original audio transcription:")
+    print(transcribe(path, "google"))
+    print("\nNew audio transcription:")
+    print(transcribe(new_audio_path, "google"))
+#HFA(args.type, args.pathF, args.frequencyF, args.intensityF)
 
 
-def TDIAttack(path, windowSize):
+def TDIAttack(type, path, windowSize):
     fs, data = scipy.io.wavfile.read(path)
     n = int(len(data)/windowSize)
 
@@ -143,11 +146,31 @@ def TDIAttack(path, windowSize):
     
     new_audio_path = path[0:-4]+''+str(fs)+'_TDI_WindowSize_'+str(windowSize)+'.wav'
     scipy.io.wavfile.write(new_audio_path, fs, data2)
-    transcribe(new_audio_path, "google")
+    print("Original audio transcription:")
+    print(transcribe(path, "google"))
+    print("\nNew audio transcription:")
+    print(transcribe(new_audio_path, "google"))
     
-TDIAttack(args.pathF, args.windowSize)
-# In[ ]:
+#TDIAttack(args.type, args.pathF, args.windowSize)
 
+
+def TimeScaling(type, inputWav, outputWav, tempo):
+    #Uses the sox command from Linux to adjust the tempo of new audio file
+    command = "sox " + inputWav + " " + outputWav +  " tempo " + tempo
+    os.system(command)
+    print("Original audio transcription:")
+    print(transcribe(inputWav, "google"))
+    print("\nNew audio transcription:")
+    print(transcribe(outputWav, "google"))
+
+if (args.type == "TDI"):
+    TDIAttack(args.type, args.pathF, args.windowSize)
+elif (args.type == "Time Scale"):
+    TimeScaling(args.type, args.pathF, args.outputPath, args.tempo)
+elif (args.type == "HFA"):
+    HFA(args.type, args.pathF, args.frequencyF, args.intensityF)
+else:
+    print("Write the name of the attack surrounded by quotes. Refer to attack.py --help for name of the attacks")
 
 
 

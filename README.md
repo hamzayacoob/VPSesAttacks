@@ -3,7 +3,15 @@ This is a repositity of 4 pertubtion techniques that expose the vunerabilites of
 
 
 # Prequisties
-The use of the following attacks requires an extensive use of libraries and imports. Be sure to import all the 
+The use of the following attacks requires an extensive use of libraries and imports. Be sure to install all the following:
+
+**Install Following Libraries:**
+pip install numpy scipy scikit-learn matplotlib ipython jupyter pandas sympy nose librosa Pillow deepspeech SpeechRecognition
+python -m pip install --upgrade pip setuptools wheel
+pip install --upgrade pocketsphinx
+
+**Download .py to code directory:**
+https://github.com/dmarienko/chaos/blob/master/ssa_core.py
 
 
 # 1. Time Domain Inversion Attack (TDI)
