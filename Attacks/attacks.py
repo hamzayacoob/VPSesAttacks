@@ -82,43 +82,9 @@ def transcribe(my_path,model):
         except sr.RequestError as e:
             print("Google error; {0}".format(e))
 
-def HFA(type, path, frequency, intensity):
-    fs, data = scipy.io.wavfile.read(path)
-    length = len(data)
-    
-    #2. Generates a high frequency sin wave
-    #Allows the sine wave to be broadcastable to the audio file we are testing
-    sampleRate = fs #give it the same sample rate as the original audio
-    frequency = frequency
-    duration = length/sampleRate #how long the audio sound is in seconds  #4.52
-
-    t = np.linspace(0, duration, sampleRate * duration)  #  Produces a 'duration' long Audio-File in seconds
-    y = np.sin(frequency * 2 * np.pi * t) * (intensity)  #Use to control the intensity of the sin wave
-
-    #Uncomment the below line if you want to listen to the sin wave that you have produced from the above line
-    #scipy.io.wavfile.write(path[0:-4]+''+'_SINEwav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav', sampleRate, y)
-    #plt.plot(y)
-    #print("This is the length of the sin sound wave:",len(y))
-
-    #3. Merges the sine wave high frequency with the original piece of audio
-    resultSound = np.add(data[:length] , y[:length] )
-
-    #4. Casts the result sound from a float to an int
-    resultSound = np.asarray(resultSound,dtype=np.int16)
-    #print(resultSound)
-
-    #5. Writes the audio file and then transcribes it 
-    new_audio_path = path[0:-4]+''+'_OutputWav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav'
-    scipy.io.wavfile.write(new_audio_path, sampleRate, resultSound)
-    
-    print("\nOriginal Audio Transcription:")
-    print(transcribe(path, "google"))
-    print("\nPerturbed Audio Transcription:")
-    print(transcribe(new_audio_path, "google"))
-
-
-def TDIAttack(type, path, windowSize):
-    fs, data = scipy.io.wavfile.read(path)
+#Time Domain Interval Attack (#1 in paper)
+def TDIAttack(type, inputPath, outputPath, windowSize):
+    fs, data = scipy.io.wavfile.read(inputPath)
     n = int(len(data)/windowSize)
 
     #Breaks array into buckets of elements
@@ -144,15 +110,17 @@ def TDIAttack(type, path, windowSize):
     data2 = np.asanyarray(l)
     data2= np.asarray(data2,dtype=np.int16)
     
-    new_audio_path = path[0:-4]+''+str(fs)+'_TDI_WindowSize_'+str(windowSize)+'.wav'
-    scipy.io.wavfile.write(new_audio_path, fs, data2)
+    #new_audio_path = path[0:-4]+''+str(fs)+'_TDI_WindowSize_'+str(windowSize)+'.wav'
+
+    scipy.io.wavfile.write(outputPath, fs, data2)
 
     print("\nOriginal Audio Transcription:")
-    print(transcribe(path, "google"))
+    print(transcribe(inputPath, "google"))
     print("\nPerturbed Audio Transcription:")
-    print(transcribe(new_audio_path, "google"))
+    print(transcribe(outputPath, "google"))
     
-
+    
+#Time Scaling Attack (#4 in paper)
 def TimeScaling(type, inputWav, outputWav, tempo):
     #Uses the sox command from Linux to adjust the tempo of new audio file
     command = "sox " + inputWav + " " + outputWav +  " tempo " + tempo
@@ -162,13 +130,51 @@ def TimeScaling(type, inputWav, outputWav, tempo):
     print("\nPerturbed Audio Transcription:")
     print(transcribe(outputWav, "google"))
 
+
+#High Frequency Addition Attack (#3 in paper)
+def HFA(type, inputPath, outputPath, frequency, intensity):
+    fs, data = scipy.io.wavfile.read(inputPath)
+    length = len(data)
+    
+    #2. Generates a high frequency sin wave
+    #Allows the sine wave to be broadcastable to the audio file we are testing
+    sampleRate = fs #give it the same sample rate as the original audio
+    frequency = frequency
+    duration = length/sampleRate #how long the audio sound is in seconds  #4.52
+
+    t = np.linspace(0, duration, sampleRate * duration)  #  Produces a 'duration' long Audio-File in seconds
+    y = np.sin(frequency * 2 * np.pi * t) * (intensity)  #Use to control the intensity of the sin wave
+
+    #Uncomment the below line if you want to listen to the sin wave that you have produced from the above line
+    #scipy.io.wavfile.write(path[0:-4]+''+'_SINEwav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav', sampleRate, y)
+    #plt.plot(y)
+    #print("This is the length of the sin sound wave:",len(y))
+
+    #3. Merges the sine wave high frequency with the original piece of audio
+    resultSound = np.add(data[:length] , y[:length] )
+
+    #4. Casts the result sound from a float to an int
+    resultSound = np.asarray(resultSound,dtype=np.int16)
+    #print(resultSound)
+
+    #5. Writes the audio file and then transcribes it 
+    #new_audio_path = path[0:-4]+''+'_OutputWav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav'
+    scipy.io.wavfile.write(outputPath, sampleRate, resultSound)
+    
+    print("\nOriginal Audio Transcription:")
+    print(transcribe(inputPath, "google"))
+    print("\nPerturbed Audio Transcription:")
+    print(transcribe(outputPath, "google"))
+
+
+
 #Determines which attack to run based off the input parameter for --type
 if (args.type == "TDI"):
-    TDIAttack(args.type, args.pathF, args.windowSize)
+    TDIAttack(args.type, args.pathF, args.outputPath, args.windowSize)
 elif (args.type == "Time Scale"):
     TimeScaling(args.type, args.pathF, args.outputPath, args.tempo)
 elif (args.type == "HFA"):
-    HFA(args.type, args.pathF, args.frequencyF, args.intensityF)
+    HFA(args.type, args.pathF, args.outputPath, args.frequencyF, args.intensityF)
 else:
     print("Write the name of the attack surrounded by quotes. Refer to attack.py --help for name of the attacks")
 
