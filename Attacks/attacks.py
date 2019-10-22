@@ -101,20 +101,20 @@ def HFA(type, path, frequency, intensity):
     #print("This is the length of the sin sound wave:",len(y))
 
     #3. Merges the sine wave high frequency with the original piece of audio
-    resultSound = np.add(data[:length-1] , y[:length] )
+    resultSound = np.add(data[:length] , y[:length] )
 
     #4. Casts the result sound from a float to an int
     resultSound = np.asarray(resultSound,dtype=np.int16)
     #print(resultSound)
 
     #5. Writes the audio file and then transcribes it 
-    new_audio_path = scipy.io.wavfile.write(path[0:-4]+''+'_OutputWav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav', sampleRate, resultSound)
+    new_audio_path = path[0:-4]+''+'_OutputWav_Frequency'+''+str(fs)+'_Intensity'+str(intensity)+'.wav'
+    scipy.io.wavfile.write(new_audio_path, sampleRate, resultSound)
     
-    print("Original audio transcription:")
+    print("\nOriginal Audio Transcription:")
     print(transcribe(path, "google"))
-    print("\nNew audio transcription:")
+    print("\nPerturbed Audio Transcription:")
     print(transcribe(new_audio_path, "google"))
-#HFA(args.type, args.pathF, args.frequencyF, args.intensityF)
 
 
 def TDIAttack(type, path, windowSize):
@@ -146,23 +146,23 @@ def TDIAttack(type, path, windowSize):
     
     new_audio_path = path[0:-4]+''+str(fs)+'_TDI_WindowSize_'+str(windowSize)+'.wav'
     scipy.io.wavfile.write(new_audio_path, fs, data2)
-    print("Original audio transcription:")
+
+    print("\nOriginal Audio Transcription:")
     print(transcribe(path, "google"))
-    print("\nNew audio transcription:")
+    print("\nPerturbed Audio Transcription:")
     print(transcribe(new_audio_path, "google"))
     
-#TDIAttack(args.type, args.pathF, args.windowSize)
-
 
 def TimeScaling(type, inputWav, outputWav, tempo):
     #Uses the sox command from Linux to adjust the tempo of new audio file
     command = "sox " + inputWav + " " + outputWav +  " tempo " + tempo
     os.system(command)
-    print("Original audio transcription:")
+    print("\nOriginal Audio Transcription:")
     print(transcribe(inputWav, "google"))
-    print("\nNew audio transcription:")
+    print("\nPerturbed Audio Transcription:")
     print(transcribe(outputWav, "google"))
 
+#Determines which attack to run based off the input parameter for --type
 if (args.type == "TDI"):
     TDIAttack(args.type, args.pathF, args.windowSize)
 elif (args.type == "Time Scale"):
