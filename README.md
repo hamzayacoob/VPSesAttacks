@@ -8,7 +8,7 @@ The use of the following attacks requires an extensive use of libraries and impo
 **Install Following Libraries:** <br />
 ```
 pip install numpy scipy scikit-learn matplotlib ipython jupyter pandas sympy nose librosa Pillow SpeechRecognition <br />
-python -m pip install --upgrade pip setuptools wheel <br />
+python -m pip install --upgrade pip setuptools wheel
 ```
 <br />
 
