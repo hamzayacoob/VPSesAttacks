@@ -172,6 +172,7 @@ def findExample(ok_fft_val):
     imag_part = math.cos(phase_radians)*ok_fft_val
     assert((real_part*real_part + imag_part*imag_part)**0.5-ok_fft_val < .0001)
     result = (real_part + imag_part*1j)
+    radian_list = [0] * 25
     radian_list[int(phase_angle*25/2)] += 1
     return result
 
@@ -181,9 +182,10 @@ def createBuckets(arr, n):
         return [ arr[i*length // n: (i+1)*length // n] 
                  for i in range(n) ]
 
+
+### Main RPG Attack Function ###
 def output_RPG_Attack(attack, inputPath, outputPath, windowSize):
-    ### Main RPG Attack Function ###
-    radian_list = [0]*25
+    
     #Read in the amplitude of the audio file
     fs, data = scipy.io.wavfile.read(inputPath)
 
